@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7CCBFF">
+<meta name="description" content="Faladeiro: o cachorrinho que repete tudo e incentiva a criança a falar.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Faladeiro">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Faladeiro</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Cenário ===== -->
+  <div id="scene" aria-hidden="true">
+    <div class="sky"></div>
+    <div class="sky-night"></div>
+    <div class="night-stars"></div>
+    <div class="beams"></div>
+    <div class="sun"><div class="rays"></div><div class="disc"></div></div>
+    <div class="moon"></div>
+    <div class="cloud" style="--s:1;--y:9%;--d:80s;--o:-20s"></div>
+    <div class="cloud" style="--s:.7;--y:21%;--d:110s;--o:-70s"></div>
+    <div class="cloud" style="--s:.85;--y:3%;--d:140s;--o:-110s"></div>
+
+    <div class="horizon">
+      <svg class="far" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0,40 C60,10 120,22 180,30 C250,40 300,8 400,26 L400,60 L0,60 Z"/></svg>
+      <div class="fence"></div>
+      <svg class="house" viewBox="0 0 124 112">
+        <path d="M20,46 L104,46 L104,108 L20,108 Z" fill="#F7C57F" stroke="#7A3B1E" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M20,64 L104,64 M20,82 L104,82 M20,100 L104,100" stroke="#DDA15E" stroke-width="2.5"/>
+        <path d="M44,108 L44,78 A18,18 0 0 1 80,78 L80,108 Z" fill="#5A3421" stroke="#7A3B1E" stroke-width="3"/>
+        <path d="M3,52 L62,6 L121,52 L110,60 L62,22 L14,60 Z" fill="#F0605A" stroke="#7A3B1E" stroke-width="3.5" stroke-linejoin="round"/>
+        <g transform="translate(62 54)"><path d="M-14,-3 a4,4 0 1 1 3,-5 L11,-8 a4,4 0 1 1 3,5 a4,4 0 1 1 -3,5 L-11,2 a4,4 0 1 1 -3,-5 Z" fill="#fff" stroke="#7A3B1E" stroke-width="2"/></g>
+      </svg>
+      <svg class="tree" viewBox="0 0 120 150">
+        <path d="M54,150 L56,92 L64,92 L66,150 Z" fill="#9A6236" stroke="#6B3F1E" stroke-width="3"/>
+        <circle cx="60" cy="56" r="40" fill="#5FC25A"/>
+        <circle cx="30" cy="78" r="26" fill="#56B652"/>
+        <circle cx="92" cy="76" r="28" fill="#56B652"/>
+        <circle cx="48" cy="40" r="22" fill="#7AD06F"/>
+        <circle cx="40" cy="70" r="5" fill="#FF6B6B"/><circle cx="80" cy="52" r="5" fill="#FF6B6B"/><circle cx="72" cy="86" r="5" fill="#FF6B6B"/>
+      </svg>
+    </div>
+
+    <div class="ground">
+      <svg class="hills" viewBox="0 0 400 200" preserveAspectRatio="none">
+        <path class="h1" d="M0,34 C80,14 150,26 215,30 C285,36 335,12 400,22 L400,200 L0,200 Z"/>
+        <path class="h2" d="M0,70 C90,50 160,64 220,66 C290,68 335,54 400,62 L400,200 L0,200 Z"/>
+      </svg>
+      <span class="flower" style="left:6%;top:30%">🌼</span>
+      <span class="flower" style="left:92%;top:27%">🌷</span>
+      <span class="flower" style="left:16%;top:46%;font-size:13px">🌸</span>
+      <span class="flower" style="left:83%;top:47%;font-size:14px">🌼</span>
+    </div>
+  </div>
+
+  <!-- ===== Palco ===== -->
+  <main id="stage">
+    <div id="card" class="card">
+      <div class="emoji"></div>
+      <div class="word"></div>
+    </div>
+
+    <div id="dogWrap">
+      <svg id="dog" viewBox="-26 -4 452 484" preserveAspectRatio="xMidYMax meet" data-eye="open">
+        <defs>
+          <radialGradient id="gBody" gradientUnits="userSpaceOnUse" cx="200" cy="330" r="190">
+            <stop offset="0" stop-color="#FFD08F"/>
+            <stop offset=".7" stop-color="#F5B062"/>
+            <stop offset="1" stop-color="#E3964A"/>
+          </radialGradient>
+          <radialGradient id="gHead" gradientUnits="userSpaceOnUse" cx="185" cy="140" r="170">
+            <stop offset="0" stop-color="#FFD69A"/>
+            <stop offset=".72" stop-color="#F6B366"/>
+            <stop offset="1" stop-color="#E4984D"/>
+          </radialGradient>
+          <linearGradient id="gEar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#B26A36"/>
+            <stop offset="1" stop-color="#8C4C22"/>
+          </linearGradient>
+          <radialGradient id="gCream" cx=".5" cy=".35" r=".7">
+            <stop offset="0" stop-color="#FFFBF3"/>
+            <stop offset="1" stop-color="#FFE8C8"/>
+          </radialGradient>
+          <radialGradient id="gEye" cx=".4" cy=".62" r=".7">
+            <stop offset="0" stop-color="#6A3D22"/>
+            <stop offset=".55" stop-color="#2B1810"/>
+            <stop offset="1" stop-color="#150B06"/>
+          </radialGradient>
+          <clipPath id="cHead"><ellipse cx="200" cy="178" rx="128" ry="106"/></clipPath>
+          <clipPath id="cMouth"><path id="dMouthClipPath" d="M0,0"/></clipPath>
+        </defs>
+
+        <ellipse id="dShadow" cx="200" cy="463" rx="138" ry="15" fill="#1F5A1C" opacity=".2"/>
+
+        <g id="dAll">
+          <g id="dTail" data-part="tail">
+            <path d="M262,414 C312,410 336,384 340,350 C342,334 354,322 364,330 C374,338 366,362 358,378 C344,408 312,434 262,436 Z" fill="url(#gBody)" stroke="#5B3520" stroke-width="5" stroke-linejoin="round"/>
+            <path d="M341,349 C343,335 354,324 363,331 C369,336 369,345 365,354 C358,348 349,346 341,349 Z" fill="#FFF3E0"/>
+          </g>
+
+          <g data-part="feet">
+            <ellipse cx="112" cy="410" rx="58" ry="46" fill="url(#gBody)" stroke="#5B3520" stroke-width="5"/>
+            <ellipse cx="288" cy="410" rx="58" ry="46" fill="url(#gBody)" stroke="#5B3520" stroke-width="5"/>
+            <ellipse cx="90" cy="450" rx="36" ry="16" fill="#FFF1DE" stroke="#5B3520" stroke-width="5"/>
+            <ellipse cx="310" cy="450" rx="36" ry="16" fill="#FFF1DE" stroke="#5B3520" stroke-width="5"/>
+          </g>
+
+          <path data-part="body" d="M200,262 C264,262 302,318 302,378 C302,432 260,460 200,460 C140,460 98,432 98,378 C98,318 136,262 200,262 Z" fill="url(#gBody)" stroke="#5B3520" stroke-width="5"/>
+          <ellipse data-part="belly" cx="200" cy="376" rx="60" ry="62" fill="url(#gCream)"/>
+
+          <g data-part="body">
+            <path d="M128,290 Q200,336 272,290" fill="none" stroke="#5B3520" stroke-width="27" stroke-linecap="round"/>
+            <path d="M128,290 Q200,336 272,290" fill="none" stroke="#FF5A6E" stroke-width="18" stroke-linecap="round"/>
+            <path d="M140,291 Q200,327 260,291" fill="none" stroke="#FF94A2" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+            <circle cx="200" cy="326" r="15" fill="#FFD23F" stroke="#5B3520" stroke-width="4"/>
+            <path d="M200,333 C193,328 189,325 189,320 C189,316 192,314 195,314 C197,314 199,315 200,317 C201,315 203,314 205,314 C208,314 211,316 211,320 C211,325 207,328 200,333 Z" fill="#FF5A6E"/>
+          </g>
+
+          <g id="dHead">
+            <g data-part="head">
+              <path d="M184,82 C176,60 190,44 204,54 C210,40 232,44 228,62 C226,74 216,80 204,80 Z" fill="url(#gHead)" stroke="#5B3520" stroke-width="5" stroke-linejoin="round"/>
+              <ellipse cx="200" cy="178" rx="128" ry="106" fill="url(#gHead)" stroke="#5B3520" stroke-width="5"/>
+              <g clip-path="url(#cHead)"><ellipse cx="254" cy="156" rx="50" ry="44" fill="#C98040" opacity=".82"/></g>
+            </g>
+
+            <ellipse data-part="mouth" cx="200" cy="228" rx="66" ry="46" fill="url(#gCream)"/>
+            <ellipse id="dCheekL" data-part="mouth" cx="120" cy="214" rx="19" ry="12" fill="#FF8FA3" opacity=".5"/>
+            <ellipse id="dCheekR" data-part="mouth" cx="280" cy="214" rx="19" ry="12" fill="#FF8FA3" opacity=".5"/>
+
+            <g data-part="mouth">
+              <path id="dMouthFill" d="M0,0" fill="#7A2334" stroke="#5B3520" stroke-width="5" stroke-linejoin="round"/>
+              <g clip-path="url(#cMouth)"><ellipse id="dTongue" cx="200" cy="260" rx="18" ry="10" fill="#FF7A90"/></g>
+              <g id="dTongueHang" style="display:none">
+                <path id="dTongueFill" d="M0,0" fill="#FF7A90"/>
+                <path id="dTongueGroove" d="M0,0" stroke="#E0556E" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <path id="dTongueLine" d="M0,0" fill="none" stroke="#5B3520" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+              </g>
+              <path d="M200,214 L200,228" stroke="#5B3520" stroke-width="5" stroke-linecap="round"/>
+              <path id="dMouthLine" d="M0,0" fill="none" stroke="#5B3520" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+
+            <g id="dNose" data-part="nose">
+              <path d="M180,196 C180,184 220,184 220,196 C220,208 208,216 200,216 C192,216 180,208 180,196 Z" fill="#3A2418" stroke="#2A170D" stroke-width="2"/>
+              <ellipse cx="192" cy="192" rx="7.5" ry="4" fill="#fff" opacity=".75"/>
+            </g>
+
+            <path id="dBrowL" d="M127,124 Q145,112 164,121" fill="none" stroke="#5B3520" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+            <path id="dBrowR" d="M236,121 Q255,112 273,124" fill="none" stroke="#5B3520" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+
+            <g id="dEyeL" data-part="eye" transform="translate(148 160)">
+              <g class="e-open">
+                <ellipse rx="21" ry="25" fill="url(#gEye)"/>
+                <circle cx="6" cy="-9" r="7.5" fill="#fff"/>
+                <circle cx="-7" cy="9" r="3.5" fill="#fff" opacity=".9"/>
+              </g>
+              <path class="e-happy" d="M-19,7 Q0,-17 19,7" fill="none" stroke="#3A2418" stroke-width="7" stroke-linecap="round"/>
+              <path class="e-closed" d="M-19,-2 Q0,14 19,-2" fill="none" stroke="#3A2418" stroke-width="6" stroke-linecap="round"/>
+              <path class="e-heart" d="M0,16 C-12,6 -24,-2 -24,-12 C-24,-20 -17,-25 -11,-25 C-6,-25 -2,-22 0,-18 C2,-22 6,-25 11,-25 C17,-25 24,-20 24,-12 C24,-2 12,6 0,16 Z" fill="#FF4D6D" stroke="#B8243F" stroke-width="3"/>
+              <path class="e-star" d="M0,-24 L6.5,-8 L23,-7.5 L10,3 L14.5,20 L0,10.5 L-14.5,20 L-10,3 L-23,-7.5 L-6.5,-8 Z" fill="#FFD23F" stroke="#C98A00" stroke-width="3" stroke-linejoin="round"/>
+              <path class="e-dizzy" d="M-12,-12 L12,12 M12,-12 L-12,12" stroke="#3A2418" stroke-width="7" stroke-linecap="round"/>
+            </g>
+            <g id="dEyeR" data-part="eye" transform="translate(252 160)">
+              <g class="e-open">
+                <ellipse rx="21" ry="25" fill="url(#gEye)"/>
+                <circle cx="6" cy="-9" r="7.5" fill="#fff"/>
+                <circle cx="-7" cy="9" r="3.5" fill="#fff" opacity=".9"/>
+              </g>
+              <path class="e-happy" d="M-19,7 Q0,-17 19,7" fill="none" stroke="#3A2418" stroke-width="7" stroke-linecap="round"/>
+              <path class="e-closed" d="M-19,-2 Q0,14 19,-2" fill="none" stroke="#3A2418" stroke-width="6" stroke-linecap="round"/>
+              <path class="e-heart" d="M0,16 C-12,6 -24,-2 -24,-12 C-24,-20 -17,-25 -11,-25 C-6,-25 -2,-22 0,-18 C2,-22 6,-25 11,-25 C17,-25 24,-20 24,-12 C24,-2 12,6 0,16 Z" fill="#FF4D6D" stroke="#B8243F" stroke-width="3"/>
+              <path class="e-star" d="M0,-24 L6.5,-8 L23,-7.5 L10,3 L14.5,20 L0,10.5 L-14.5,20 L-10,3 L-23,-7.5 L-6.5,-8 Z" fill="#FFD23F" stroke="#C98A00" stroke-width="3" stroke-linejoin="round"/>
+              <path class="e-dizzy" d="M-12,-12 L12,12 M12,-12 L-12,12" stroke="#3A2418" stroke-width="7" stroke-linecap="round"/>
+            </g>
+
+            <g id="dEarL" data-part="ear">
+              <path d="M112,86 C78,76 38,106 32,164 C27,214 44,252 74,250 C100,248 110,220 113,186 C116,150 132,98 112,86 Z" fill="url(#gEar)" stroke="#5B3520" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M88,108 C66,128 54,170 58,212" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".14"/>
+            </g>
+            <g id="dEarR" data-part="ear">
+              <path d="M288,86 C322,76 362,106 368,164 C373,214 356,252 326,250 C300,248 290,220 287,186 C284,150 268,98 288,86 Z" fill="url(#gEar)" stroke="#5B3520" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M312,108 C334,128 346,170 342,212" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".14"/>
+            </g>
+          </g>
+
+          <g id="dLegL" data-part="paw">
+            <rect x="143" y="356" width="44" height="92" rx="22" fill="url(#gBody)" stroke="#5B3520" stroke-width="5"/>
+            <ellipse cx="163" cy="444" rx="29" ry="16" fill="#FFF1DE" stroke="#5B3520" stroke-width="5"/>
+            <path d="M155,437 L155,449 M171,437 L171,449" stroke="#5B3520" stroke-width="3.5" stroke-linecap="round"/>
+            <g id="dPadL" opacity="0">
+              <ellipse cx="163" cy="447" rx="11" ry="7" fill="#FF9EAE"/>
+              <circle cx="149" cy="437" r="4.5" fill="#FF9EAE"/><circle cx="163" cy="433" r="4.5" fill="#FF9EAE"/><circle cx="177" cy="437" r="4.5" fill="#FF9EAE"/>
+            </g>
+          </g>
+          <g id="dLegR" data-part="paw">
+            <rect x="213" y="356" width="44" height="92" rx="22" fill="url(#gBody)" stroke="#5B3520" stroke-width="5"/>
+            <ellipse cx="237" cy="444" rx="29" ry="16" fill="#FFF1DE" stroke="#5B3520" stroke-width="5"/>
+            <path d="M229,437 L229,449 M245,437 L245,449" stroke="#5B3520" stroke-width="3.5" stroke-linecap="round"/>
+            <g id="dPadR" opacity="0">
+              <ellipse cx="237" cy="447" rx="11" ry="7" fill="#FF9EAE"/>
+              <circle cx="223" cy="437" r="4.5" fill="#FF9EAE"/><circle cx="237" cy="433" r="4.5" fill="#FF9EAE"/><circle cx="251" cy="437" r="4.5" fill="#FF9EAE"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </main>
+
+  <!-- ===== Brinquedos ===== -->
+  <nav id="tray" aria-label="Brinquedos">
+    <button class="toy" data-toy="bola" aria-label="Bola" style="--c:#CFEBFF;--r:#7CC4F5"><span>⚽</span></button>
+    <button class="toy" data-toy="comida" aria-label="Comida" style="--c:#FFE2D6;--r:#FF9E80"><span>🍎</span></button>
+    <button class="toy" data-toy="bolhas" aria-label="Bolhas" style="--c:#E9E1FF;--r:#A993F5"><span><svg viewBox="0 0 48 48" width="1em" height="1em"><circle cx="19" cy="27" r="13" fill="#BDE7FF" fill-opacity=".7" stroke="#6FB7F0" stroke-width="3"/><circle cx="34" cy="14" r="8" fill="#FFD6F0" fill-opacity=".8" stroke="#E78BC7" stroke-width="2.5"/><path d="M12,21 a8,8 0 0 1 7,-5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="36" cy="34" r="5" fill="#D9FFE8" stroke="#6CCB95" stroke-width="2"/></svg></span></button>
+    <button class="toy" data-toy="musica" aria-label="Música" style="--c:#FFDDEE;--r:#F58DBE"><span>🎵</span></button>
+    <button class="toy" data-toy="figuras" aria-label="Figuras" style="--c:#D9F6E7;--r:#6ED3A2"><span>📖</span></button>
+    <button class="toy" data-toy="dormir" aria-label="Dormir" style="--c:#E0E5FF;--r:#8C9AF0"><span>🌙</span></button>
+  </nav>
+
+  <div id="props"></div>
+  <canvas id="fx"></canvas>
+  <div id="heard" aria-live="polite"></div>
+
+  <button id="micWarn" class="corner-btn mic-warn" hidden aria-label="Microfone desligado">🎤</button>
+  <button id="gear" class="corner-btn gear" aria-label="Área dos pais (segure)">
+    <svg class="hold" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17"/></svg>
+    <span>⚙️</span>
+  </button>
+
+  <!-- ===== Tela inicial ===== -->
+  <div id="start">
+    <div class="start-inner">
+      <h1 class="title" aria-label="Faladeiro"></h1>
+      <img class="hero" src="icons/face.svg" alt="" draggable="false">
+      <button id="play" aria-label="Brincar">
+        <svg viewBox="0 0 100 100"><path d="M38,26 L76,50 L38,74 Z" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="note">Toque para começar e permita o <b>microfone</b>.<br>Volume alto e sem fone de ouvido. 💛</p>
+    </div>
+  </div>
+
+  <!-- ===== Área dos pais ===== -->
+  <div id="parent" class="parent" hidden>
+    <div class="sheet" role="dialog" aria-label="Área dos pais">
+      <header class="sheet-head">
+        <h2>Área dos pais</h2>
+        <button id="pClose" class="x" aria-label="Fechar">✕</button>
+      </header>
+
+      <section class="stats">
+        <div class="stat"><b id="stToday">0</b><span>falas hoje</span></div>
+        <div class="stat"><b id="stTotal">0</b><span>falas no total</span></div>
+        <div class="stat"><b id="stWordsN">0</b><span>palavras</span></div>
+      </section>
+      <div class="words-title">Palavras e comandos que ele já falou:</div>
+      <div id="stWords" class="chips"></div>
+
+      <section class="cmd-box">
+        <h3>🗣️ Comandos de voz</h3>
+        <label class="switch"><input type="checkbox" id="pCmd"><span></span> Ligar comandos de voz (o cachorro obedece)</label>
+        <div id="cmdStatus" class="cmd-status"></div>
+        <label class="field">Facilidade para obedecer <input type="range" id="pCmdStrict" min="0.2" max="0.9" step="0.05"></label>
+        <p class="hint">À esquerda ele obedece mais fácil (melhor para a fala da criança); à direita só quando entende bem.</p>
+        <p id="cmdLast" class="hint"></p>
+        <table class="cmd-list">
+          <thead><tr><th>Fale</th><th>Ele…</th></tr></thead>
+          <tbody id="cmdList"></tbody>
+        </table>
+        <p class="hint">Ele sempre repete o que ouviu e, se reconhecer um comando, obedece em seguida. Nas Figuras (📖) os comandos ficam pausados. Tudo é processado no próprio celular, sem enviar áudio para a internet. Na primeira vez baixa cerca de 38 MB (prefira Wi-Fi).</p>
+      </section>
+
+      <label class="field">Sensibilidade do microfone <input type="range" id="pSens" min="0" max="1" step="0.05"></label>
+      <div class="meter"><i id="pMeter"></i><span id="pMeterTh"></span></div>
+      <p class="hint">Faça barulho perto do celular: a barra verde deve passar do risco vermelho. Se ele repetir barulhos da casa à toa, diminua.</p>
+
+      <label class="field">Voz da repetição (quão fininha) <input type="range" id="pEchoPitch" min="1.15" max="1.9" step="0.05"></label>
+      <label class="field">Velocidade da voz do Faladeiro <input type="range" id="pVoiceRate" min="0.85" max="1.2" step="0.05"></label>
+
+      <label class="switch"><input type="checkbox" id="pCallbacks"><span></span> Quando a criança fica quieta, imitar as falas dela para chamá-la</label>
+      <label class="switch"><input type="checkbox" id="pButterfly"><span></span> Borboleta passeando na tela</label>
+
+      <label class="field">Volume dos efeitos <input type="range" id="pSfx" min="0" max="1" step="0.05"></label>
+      <label class="field">Volume das músicas <input type="range" id="pMusic" min="0" max="1" step="0.05"></label>
+
+      <div class="btns">
+        <button id="pFull" class="btn" type="button">⛶ Tela cheia</button>
+        <button id="pMic" class="btn" type="button">🎤 Reativar microfone</button>
+      </div>
+
+      <details class="tips" open>
+        <summary>💡 Como usar para estimular a fala</summary>
+        <ul>
+          <li><b>Deixe ele fazer barulho.</b> Todo som vale: o Faladeiro repete e comemora. É isso que faz a criança querer falar mais.</li>
+          <li><b>Brinque junto.</b> Fale com o cachorro também: a criança imita você.</li>
+          <li><b>Quando ele fica quieto,</b> o Faladeiro repete as últimas falas dele com vozes engraçadas para chamá-lo de volta.</li>
+          <li><b>Figuras (📖):</b> passam sozinhas. O cachorro fala a palavra e espera; se a criança falar qualquer coisa, comemora. Tocar na figura passa para a próxima.</li>
+          <li><b>Nunca corrija.</b> Repita a palavra certa com alegria: “Isso! Bola!”.</li>
+          <li><b>Sessões curtas</b> de 10 a 15 minutos, algumas vezes por dia.</li>
+          <li>Se perto dos 2 anos ele fala poucas palavras, converse com o pediatra ou um fonoaudiólogo.</li>
+        </ul>
+      </details>
+
+      <button id="pReset" class="btn ghost" type="button">Zerar estatísticas</button>
+      <p class="foot">Faladeiro é um apoio lúdico e não substitui a avaliação de um fonoaudiólogo.</p>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="js/store.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/mic.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/dog.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/ball.js"></script>
+<script src="js/brain.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

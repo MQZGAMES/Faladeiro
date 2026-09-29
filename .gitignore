@@ -1,0 +1,13 @@
+# configurações locais do editor/assistente
+.claude/
+
+# testes e temporários
+_teste/
+*.zip
+__pycache__/
+*.pyc
+
+# sistema
+.DS_Store
+Thumbs.db
+desktop.ini
