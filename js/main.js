@@ -5,12 +5,19 @@
   const stageEl = document.getElementById('stage');
   let started = false;
 
-  /* ---------- layout: horizonte e gramado acompanham o cachorro ---------- */
+  /* ---------- layout: cerca e gramado posicionados pelo corpo do cachorro (igual em qualquer tela) ---------- */
+  const dogWrap = document.getElementById('dogWrap');
   function layout() {
-    const s = stageEl.getBoundingClientRect();
+    const st = stageEl.getBoundingClientRect();
+    const W = dogWrap.offsetWidth, H = dogWrap.offsetHeight;   // tamanho sem as transformações do modo Figuras
+    const s = Math.min(W / 452, H / 484);                       // escala do SVG (viewBox 452 x 484, alinhado embaixo)
+    const top0 = st.top + dogWrap.offsetTop + H - 484 * s;
+    const yAt = (y) => top0 + (y + 4) * s;                      // Y na tela de um ponto do desenho do cachorro
     const root = document.documentElement.style;
-    root.setProperty('--horizon', (s.top + s.height * 0.5).toFixed(0) + 'px');
-    root.setProperty('--ground', Math.max(140, window.innerHeight - (s.top + s.height * 0.66)).toFixed(0) + 'px');
+    // cerca pisa no chão atrás da cabeça; gramado da frente começa na altura das patas de trás
+    const horizon = Math.max(st.top + 150, yAt(95));
+    root.setProperty('--horizon', horizon.toFixed(0) + 'px');
+    root.setProperty('--ground', Math.max(120, window.innerHeight - yAt(335)).toFixed(0) + 'px');
     F.fx.resize();
     F.ball.resize();
   }

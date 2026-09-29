@@ -107,17 +107,21 @@ button { font-family: inherit; color: inherit; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* horizonte: morros ao fundo, cerca, casinha e árvore */
+/* horizonte (--horizon = linha onde a cerca pisa no chão): campo, morros ao fundo, cerca, casinha e árvore */
 .horizon { position: absolute; left: 0; right: 0; top: var(--horizon); height: 0; transition: filter 1.4s ease; }
-.horizon .far { position: absolute; left: 0; width: 100%; height: 70px; bottom: -34px; fill: #BDECA0; }
+.horizon .field {
+  position: absolute; left: 0; right: 0; top: -12px; height: 200vh;
+  background: linear-gradient(180deg, #C6F0A8 0, #B4E891 120px, #9FDD7C 320px);
+}
+.horizon .far { position: absolute; left: 0; width: 100%; height: 92px; bottom: -10px; fill: #CFF2B6; }
 .fence {
-  position: absolute; left: -10px; right: -10px; bottom: -40px; height: 54px;
+  position: absolute; left: -10px; right: -10px; bottom: -6px; height: 54px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='54' viewBox='0 0 26 54'%3E%3Crect x='0' y='18' width='26' height='7' fill='%23FFFFFF' stroke='%23D7C7B0' stroke-width='1.5'/%3E%3Crect x='0' y='38' width='26' height='7' fill='%23FFFFFF' stroke='%23D7C7B0' stroke-width='1.5'/%3E%3Cpath d='M6,54 L6,9 L13,2 L20,9 L20,54 Z' fill='%23FFFFFF' stroke='%23D7C7B0' stroke-width='1.5'/%3E%3C/svg%3E") repeat-x;
   background-size: 26px 54px;
   opacity: .95;
 }
-.house { position: absolute; left: 1%; bottom: -44px; width: min(29vw, 150px); height: auto; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, .12)); }
-.tree { position: absolute; right: -2%; bottom: -46px; width: min(30vw, 160px); height: auto; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, .1)); }
+.house { position: absolute; left: 1%; bottom: -14px; width: min(29vw, 150px, 26vh); height: auto; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, .12)); }
+.tree { position: absolute; right: -2%; bottom: -16px; width: min(30vw, 160px, 24vh); height: auto; filter: drop-shadow(0 6px 4px rgba(0, 0, 0, .1)); }
 
 .ground { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ground); transition: filter 1.4s ease; }
 .hills { position: absolute; inset: 0; width: 100%; height: 100%; }
