@@ -7,38 +7,97 @@ F.mic = (() => {
   const MIN_VOICED = 4;     // som mínimo (~0,17 s) para contar
   const MAX_SEC = 6;
 
-  let ctx = null, stream = null, proc = null, source = null;
-  let enabled = false, denied = false, paused = false;
+  let ctx = null, stream = null, proc = null, source = null, mute = null, track = null;
+  let enabled = false, denied = false, paused = false, lastError = '';
   let state = 'idle';
   let pre = [], rec = [], above = 0, below = 0, voiced = 0, peak = 0;
   let nf = 0.006;           // nível de ruído ambiente
   let suppressUntil = 0;
   let musicMode = false;
   let lastLevel = 0, lastRms = 0;
+  let chunks = 0, lastChunkAt = 0, connectedAt = 0;
+
+  // iPhone/iPad (todos os navegadores de lá usam o motor do Safari) e Safari no Mac.
+  const ua = navigator.userAgent;
+  const isApple = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+    /^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(ua);
 
   const handlers = { start: [], end: [], cancel: [], level: [] };
   const on = (ev, fn) => handlers[ev].push(fn);
   const emit = (ev, ...a) => handlers[ev].forEach((fn) => { try { fn(...a); } catch (e) { console.error(e); } });
 
-  async function start() {
-    ctx = F.sound.init();
-    if (enabled) return true;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { denied = true; return false; }
+  // Pede o microfone. Chamar logo no toque de "começar" (antes de criar o áudio).
+  function request() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(Object.assign(new Error('sem suporte'), { name: 'NotSupportedError' }));
+    return navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
+    }).catch((e) => {
+      if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) throw e;
+      return navigator.mediaDevices.getUserMedia({ audio: true });
+    });
+  }
+
+  async function start(req) {
+    if (enabled && track && track.readyState === 'live') { F.sound.ensureRunning(); return true; }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
-      });
+      stream = await (req || request());
     } catch (e) {
-      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-      catch (e2) { console.warn('Microfone indisponível', e2); denied = true; return false; }
+      console.warn('Microfone indisponível', e);
+      lastError = (e && e.name) || 'erro';
+      denied = true; enabled = false;
+      F.sound.init();
+      return false;
     }
+    track = stream.getAudioTracks()[0] || null;
+    // No iPhone o áudio precisa nascer DEPOIS do microfone ligado (e na mesma taxa), senão chega mudo.
+    if (isApple || F.mic.forceApple) {
+      let sr = 0;
+      try { sr = (track && track.getSettings && track.getSettings().sampleRate) || 0; } catch (e) { sr = 0; }
+      F.sound.rebuild(sr || undefined);
+    } else {
+      F.sound.init();
+    }
+    connect();
+    if (track) {
+      track.onended = () => { enabled = false; };
+    }
+    enabled = true; denied = false; lastError = '';
+    return true;
+  }
+
+  function connect() {
+    ctx = F.sound.ctx;
+    try { if (proc) { proc.onaudioprocess = null; proc.disconnect(); } } catch (e) { /* ok */ }
+    try { if (source) source.disconnect(); } catch (e) { /* ok */ }
+    try { if (mute) mute.disconnect(); } catch (e) { /* ok */ }
     source = ctx.createMediaStreamSource(stream);
     proc = ctx.createScriptProcessor(CHUNK, 1, 1);
     proc.onaudioprocess = onChunk;
-    const mute = ctx.createGain(); mute.gain.value = 0;
+    mute = ctx.createGain(); mute.gain.value = 0;
     source.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-    enabled = true; denied = false;
+    reset();
+    chunks = 0; lastChunkAt = 0; connectedAt = performance.now();
+    F.sound.ensureRunning();
+  }
+
+  // Religa tudo (usado quando o som do microfone para de chegar). Deve ser chamado num toque.
+  async function revive() {
+    if (!stream || !track || track.readyState !== 'live') { enabled = false; return start(); }
+    if (isApple || F.mic.forceApple) {
+      let sr = 0;
+      try { sr = (track.getSettings && track.getSettings().sampleRate) || 0; } catch (e) { sr = 0; }
+      F.sound.rebuild(sr || undefined);
+    }
+    connect();
+    enabled = true;
     return true;
+  }
+
+  // Microfone ligado mas nenhum som chegando há um tempo (áudio travado pelo sistema).
+  function isStalled() {
+    if (!enabled || paused) return false;
+    const since = lastChunkAt || connectedAt;
+    return performance.now() - since > 2500;
   }
 
   // Enquanto o Faladeiro fala, o microfone não escuta (para não repetir a si mesmo).
@@ -58,6 +117,7 @@ F.mic = (() => {
   function reset() { state = 'idle'; pre = []; rec = []; above = 0; below = 0; voiced = 0; peak = 0; }
 
   function onChunk(e) {
+    chunks++; lastChunkAt = performance.now();
     const data = e.inputBuffer.getChannelData(0);
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
@@ -121,9 +181,16 @@ F.mic = (() => {
   }
 
   return {
-    start, on, suppress, reset,
+    start, request, revive, on, suppress, reset,
+    forceApple: false,        // só para testes: simula o caminho do iPhone
+    isApple,
     get enabled() { return enabled; },
     get denied() { return denied; },
+    get stalled() { return isStalled(); },
+    get receiving() { return enabled && !isStalled() && chunks > 0; },
+    get chunks() { return chunks; },
+    get lastError() { return lastError; },
+    get trackState() { return track ? `${track.readyState}${track.muted ? ', mudo' : ''}` : 'sem microfone'; },
     get speaking() { return state === 'voice'; },
     get level() { return lastLevel; },
     get rms() { return lastRms; },

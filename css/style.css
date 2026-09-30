@@ -330,6 +330,7 @@ button { font-family: inherit; color: inherit; }
 .meter i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #2ED39A; transition: width .08s linear; }
 .meter span { position: absolute; top: -2px; bottom: -2px; width: 3px; background: #FF4F6A; }
 .hint { margin: 4px 0 8px; font-size: 13px; opacity: .7; }
+.hint.diag { opacity: .9; background: #F3F7FF; border-radius: 10px; padding: 6px 10px; font-weight: 600; }
 .switch { display: flex; align-items: center; gap: 10px; margin: 14px 0; font-weight: 700; font-size: 15px; cursor: pointer; line-height: 1.25; }
 .switch input { position: absolute; opacity: 0; pointer-events: none; }
 .switch span { flex: none; position: relative; width: 50px; height: 30px; border-radius: 15px; background: #DCCFBF; transition: background .2s; }

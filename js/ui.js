@@ -68,7 +68,7 @@ F.ui = (() => {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), ms || 3500);
   }
-  function micState() { $('#micWarn').hidden = F.mic.enabled; }
+  function micState() { $('#micWarn').hidden = F.mic.enabled && !F.mic.stalled; }
 
   // Legenda discreta do comando entendido (ajuda os pais a saber que ele obedeceu).
   let heardTimer = null;
@@ -184,6 +184,15 @@ F.ui = (() => {
       : '<em>Ainda nenhuma. Toque no livro 📖 para ver figuras.</em>';
   }
 
+  // Diagnóstico do microfone (para os pais conferirem, principalmente no iPhone).
+  let diagN = 0;
+  function micDiag() {
+    const m = F.mic;
+    const mic = m.enabled ? 'ligado' : (m.lastError ? `desligado (${m.lastError})` : 'desligado');
+    const som = m.receiving ? 'chegando ✅' : (m.enabled ? 'NÃO está chegando ⚠️' : '—');
+    $('#micDiag').textContent = `Microfone: ${mic} · áudio: ${F.sound.state} (${F.sound.rate || '?'} Hz) · som do microfone: ${som} · faixa: ${m.trackState}`;
+  }
+
   function openParent() {
     const s = F.store.s;
     if (F.brain) F.brain.parentOpen(true);
@@ -200,6 +209,7 @@ F.ui = (() => {
       P.meter.style.width = sc(rms).toFixed(1) + '%';
       P.meter.style.background = rms > th ? '#2ED39A' : '#9FD9C4';
       P.meterTh.style.left = sc(th).toFixed(1) + '%';
+      if (++diagN % 15 === 0) micDiag();
       meterRaf = requestAnimationFrame(tick);
     };
     tick();
@@ -226,9 +236,11 @@ F.ui = (() => {
   parent.addEventListener('pointerdown', (e) => { if (e.target === parent) closeParent(); });
   $('#pFull').addEventListener('click', () => goFullscreen());
   $('#pMic').addEventListener('click', async () => {
-    const ok = await F.mic.start();
-    micState();
-    toast(ok ? 'Microfone ligado! 🎤' : 'O navegador bloqueou o microfone. Libere no cadeado ao lado do endereço do site.', 5000);
+    const ok = F.mic.enabled ? await F.mic.revive() : await F.mic.start();
+    micState(); micDiag();
+    toast(ok ? 'Microfone religado! 🎤' : (F.mic.isApple
+      ? 'O iPhone bloqueou o microfone: toque em "aA" na barra de endereço → Ajustes do Site → Microfone → Permitir, e recarregue.'
+      : 'O navegador bloqueou o microfone. Libere no cadeado ao lado do endereço do site.'), 7000);
   });
   $('#pReset').addEventListener('click', () => {
     if (window.confirm('Zerar as estatísticas de falas?')) { F.store.resetStats(); fillStats(); }

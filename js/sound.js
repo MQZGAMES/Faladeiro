@@ -7,14 +7,45 @@ F.sound = (() => {
   let holdUntil = 0;         // cauda de eco ainda soando
   let talkLevel = 0;
 
-  function init() {
-    if (ctx) {
-      if (ctx.state !== 'running') ctx.resume();
-      return ctx;
-    }
+  function create(sampleRate) {
     const AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC({ latencyHint: 'interactive' });
+    const opts = { latencyHint: 'interactive' };
+    if (sampleRate) opts.sampleRate = sampleRate;
+    try { ctx = new AC(opts); } catch (e) { ctx = new AC(); }
+    build();
+    // desbloqueio (iPhone): toca um silêncio e tenta retomar
+    try {
+      const b = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource(); src.buffer = b; src.connect(ctx.destination); src.start(0);
+    } catch (e) { /* ok */ }
+    ensureRunning();
+  }
 
+  function init() {
+    if (ctx) { ensureRunning(); return ctx; }
+    create();
+    return ctx;
+  }
+
+  // iPhone/Safari: depois que o microfone liga, o áudio precisa ser recriado (senão fica travado ou mudo).
+  function rebuild(sampleRate) {
+    stopVoice();
+    stopMusic();
+    const old = ctx;
+    create(sampleRate);
+    ducked = false;
+    if (old) { try { old.close(); } catch (e) { /* ok */ } }
+    return ctx;
+  }
+
+  // Qualquer toque chama isto: se o sistema pausou o áudio (ligação, Siri, tela bloqueada), retoma.
+  function ensureRunning() {
+    if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') {
+      try { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* ok */ }
+    }
+  }
+
+  function build() {
     master = ctx.createDynamicsCompressor();
     master.threshold.value = -8; master.knee.value = 8; master.ratio.value = 5;
     master.attack.value = 0.003; master.release.value = 0.2;
@@ -29,12 +60,6 @@ F.sound = (() => {
     voiceBus.connect(analyser); analyser.connect(master);
 
     applyVolumes();
-
-    // Desbloqueio do áudio no iOS: toca um silêncio dentro do gesto do usuário.
-    const b = ctx.createBuffer(1, 1, 22050);
-    const src = ctx.createBufferSource(); src.buffer = b; src.connect(ctx.destination); src.start(0);
-    if (ctx.state !== 'running') ctx.resume();
-    return ctx;
   }
 
   function applyVolumes() {
@@ -327,7 +352,7 @@ F.sound = (() => {
 
   function stopMusic() {
     if (music.timer) { clearInterval(music.timer); music.timer = null; }
-    if (music.out) {
+    if (music.out && ctx) {
       const g = music.out;
       g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.12);
       setTimeout(() => { try { g.disconnect(); } catch (e) { /* ok */ } }, 900);
@@ -363,7 +388,9 @@ F.sound = (() => {
   });
 
   return {
-    init, applyVolumes, duck, sfx: sfxProxy,
+    init, rebuild, ensureRunning, applyVolumes, duck, sfx: sfxProxy,
+    get state() { return ctx ? ctx.state : 'nenhum'; },
+    get rate() { return ctx ? ctx.sampleRate : 0; },
     playClip, playEcho, stopVoice, isTalking, voiceLevel, trim, decode,
     playMusic, stopMusic, beat, isMusic: () => !!music.song,
     suspend, resume, get ctx() { return ctx; },

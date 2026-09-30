@@ -25,8 +25,8 @@
   window.addEventListener('orientationchange', () => setTimeout(layout, 300));
   layout();
 
-  // Já carrega as falas enquanto a tela inicial aparece.
-  F.voice.init().then(() => F.voice.preload(['oi_brincar', 'r_denovo', 'r_uau', 'r_eba', 'r_mais', 'r_risada', 'p_falacomigo', 'b_bola', 't_cocegas']));
+  // Já baixa as falas enquanto a tela inicial aparece (sem abrir o áudio: no iPhone ele só pode nascer depois do microfone).
+  F.voice.init().then(() => F.voice.prefetch(['oi_brincar', 'r_denovo', 'r_uau', 'r_eba', 'r_mais', 'r_risada', 'p_falacomigo', 'b_bola', 't_cocegas']));
 
   /* ---------- começar (um toque libera som e microfone) ---------- */
   async function requestWakeLock() {
@@ -37,11 +37,19 @@
     if (started) return;
     started = true;
     startEl.classList.add('loading');
-    F.sound.init();
+    // 1º pede o microfone (ainda dentro do toque); 2º libera o som. No iPhone essa ordem importa.
+    const micReq = F.mic.request();
+    micReq.catch(() => {});
+    if (!F.mic.isApple) F.sound.init();
     if (window.matchMedia('(pointer: coarse)').matches) F.ui.goFullscreen();
-    const ok = await F.mic.start();
+    const ok = await F.mic.start(micReq);
     F.ui.micState();
-    if (!ok) F.ui.toast('Sem microfone: dá para brincar com toques. Para ele ouvir e repetir, permita o microfone.', 6000);
+    if (!ok) {
+      const iphone = F.mic.isApple
+        ? ' No iPhone: toque em "aA" na barra de endereço → Ajustes do Site → Microfone → Permitir, e recarregue.'
+        : ' Libere no cadeado ao lado do endereço do site.';
+      F.ui.toast('Sem microfone: dá para brincar com toques.' + iphone, 9000);
+    }
     requestWakeLock();
     startEl.classList.add('hide');
     setTimeout(() => startEl.remove(), 600);
@@ -120,10 +128,28 @@
   app.addEventListener('pointercancel', up);
 
   document.getElementById('micWarn').addEventListener('click', async () => {
-    const ok = await F.mic.start();
+    const ok = F.mic.enabled ? await F.mic.revive() : await F.mic.start();
     F.ui.micState();
-    F.ui.toast(ok ? 'Microfone ligado! 🎤' : 'Microfone bloqueado. Libere no cadeado ao lado do endereço do site.', 5000);
+    F.ui.toast(ok ? 'Microfone ligado! 🎤 Fale com o Faladeiro.' : (F.mic.isApple
+      ? 'Microfone bloqueado. Toque em "aA" na barra de endereço → Ajustes do Site → Microfone → Permitir.'
+      : 'Microfone bloqueado. Libere no cadeado ao lado do endereço do site.'), 6000);
   });
+
+  // iPhone: o sistema pode pausar o áudio (ligação, Siri, tela bloqueada). Qualquer toque retoma;
+  // e se o som do microfone parou de chegar, religa.
+  let reviving = false;
+  const wakeAudio = () => {
+    if (!started) return;
+    F.sound.ensureRunning();
+    if (F.mic.enabled && F.mic.stalled && !reviving) {
+      reviving = true;
+      F.mic.revive().finally(() => { reviving = false; F.ui.micState(); });
+    }
+  };
+  document.addEventListener('touchend', wakeAudio, true);
+  document.addEventListener('click', wakeAudio, true);
+  document.addEventListener('pointerdown', wakeAudio, true);
+  setInterval(() => { if (started) F.ui.micState(); }, 2000);
 
   // Sem zoom, menu de toque longo ou gestos do navegador.
   document.addEventListener('contextmenu', (e) => { if (!e.target.closest('#parent')) e.preventDefault(); });
@@ -165,6 +191,7 @@
       F.mic.paused = false;
       requestWakeLock();
       F.brain.resume();
+      setTimeout(() => F.ui.micState(), 3000);
     }
   });
 

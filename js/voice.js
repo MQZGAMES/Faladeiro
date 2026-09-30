@@ -18,12 +18,20 @@ F.voice = (() => {
     return typeof s === 'string' ? s : s.text;
   }
 
+  // Só baixa os arquivos (sem abrir o áudio). Pode rodar antes do toque de "começar" — importante no iPhone.
+  const raw = new Map();
+  const fetchRaw = (id) => fetch(`voice/${id}.mp3`).then((r) => { if (!r.ok) throw new Error(id); return r.arrayBuffer(); });
+  function prefetch(ids) {
+    ids.forEach((id) => { if (!raw.has(id) && !bufs.has(id)) raw.set(id, fetchRaw(id).catch(() => null)); });
+  }
+
   function load(id) {
     if (bufs.has(id)) return Promise.resolve(bufs.get(id));
     if (pending.has(id)) return pending.get(id);
-    const p = fetch(`voice/${id}.mp3`)
-      .then((r) => { if (!r.ok) throw new Error(id); return r.arrayBuffer(); })
-      .then((ab) => F.sound.decode(ab))
+    const src = raw.has(id) ? raw.get(id) : fetchRaw(id);
+    raw.delete(id);
+    const p = Promise.resolve(src)
+      .then((ab) => { if (!ab) throw new Error(id); return F.sound.decode(ab); })
       .then((b) => { const t = F.sound.trim(b); bufs.set(id, t); pending.delete(id); return t; })
       .catch(() => { pending.delete(id); bufs.set(id, null); return null; });
     pending.set(id, p);
@@ -79,7 +87,7 @@ F.voice = (() => {
   }
 
   return {
-    init, say, stop, load, preload, text,
+    init, say, stop, load, preload, prefetch, text,
     ids: () => Object.keys(catalog),
     has: (id) => id in catalog,
     get speaking() { return ttsSpeaking || F.sound.isTalking(); },

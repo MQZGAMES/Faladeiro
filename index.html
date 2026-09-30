@@ -246,7 +246,7 @@
       <button id="play" aria-label="Brincar">
         <svg viewBox="0 0 100 100"><path d="M38,26 L76,50 L38,74 Z" fill="#fff" stroke="#fff" stroke-width="8" stroke-linejoin="round"/></svg>
       </button>
-      <p class="note">Toque para começar e permita o <b>microfone</b>.<br>Volume alto e sem fone de ouvido. 💛</p>
+      <p class="note">Toque para começar e permita o <b>microfone</b>.<br>Volume alto e sem fone de ouvido. 💛<br><small>No iPhone, tire do modo silencioso.</small></p>
     </div>
   </div>
 
@@ -283,6 +283,7 @@
       <label class="field">Sensibilidade do microfone <input type="range" id="pSens" min="0" max="1" step="0.05"></label>
       <div class="meter"><i id="pMeter"></i><span id="pMeterTh"></span></div>
       <p class="hint">Faça barulho perto do celular: a barra verde deve passar do risco vermelho. Se ele repetir barulhos da casa à toa, diminua.</p>
+      <p id="micDiag" class="hint diag"></p>
 
       <label class="field">Voz da repetição (quão fininha) <input type="range" id="pEchoPitch" min="1.15" max="1.9" step="0.05"></label>
       <label class="field">Velocidade da voz do Faladeiro <input type="range" id="pVoiceRate" min="0.85" max="1.2" step="0.05"></label>
@@ -295,7 +296,7 @@
 
       <div class="btns">
         <button id="pFull" class="btn" type="button">⛶ Tela cheia</button>
-        <button id="pMic" class="btn" type="button">🎤 Reativar microfone</button>
+        <button id="pMic" class="btn" type="button">🎤 Religar microfone</button>
       </div>
 
       <details class="tips" open>
