@@ -4,7 +4,7 @@ window.F = window.F || {};
 F.store = (() => {
   const KEY = 'faladeiro.v2';
   const defaults = {
-    sensitivity: 0.65, // 0..1 — sensibilidade do microfone
+    sensitivity: 0.8, // 0..1 — sensibilidade do microfone
     echoPitch: 1.5,    // quão fininha fica a repetição da criança
     voiceRate: 1.0,    // velocidade/tom da voz do Faladeiro
     callbacks: true,   // imitar a criança quando ela fica quieta

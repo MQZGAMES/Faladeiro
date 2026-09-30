@@ -1,5 +1,5 @@
 /* Guarda o app e todas as falas no aparelho para abrir rápido e funcionar sem internet. */
-const CACHE = 'faladeiro-v5';
+const CACHE = 'faladeiro-v6';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/store.js', 'js/sound.js', 'js/voice.js', 'js/mic.js', 'js/commands.js', 'js/dog.js', 'js/fx.js', 'js/ui.js', 'js/ball.js', 'js/brain.js', 'js/main.js',

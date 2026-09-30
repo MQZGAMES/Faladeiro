@@ -30,7 +30,8 @@ F.mic = (() => {
   function request() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(Object.assign(new Error('sem suporte'), { name: 'NotSupportedError' }));
     return navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
+      // ganho automático ligado: deixa a voz de criança (baixinha ou longe) mais forte
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 },
     }).catch((e) => {
       if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) throw e;
       return navigator.mediaDevices.getUserMedia({ audio: true });
@@ -109,8 +110,9 @@ F.mic = (() => {
 
   function threshold() {
     const s = F.store.s.sensitivity;
-    const minAbs = 0.05 * Math.pow(0.16, s);       // 0,05 … 0,008
-    return Math.max(minAbs, nf * 3.2) * (musicMode ? 2.4 : 1);
+    const minAbs = 0.03 * Math.pow(0.05, s);       // 0,03 … 0,0015 (máximo = ouve voz baixinha)
+    const overNoise = 3.2 - 1.4 * s;               // quanto acima do ruído da casa precisa estar
+    return Math.max(minAbs, nf * overNoise) * (musicMode ? 2.4 : 1);
   }
   const loudLevel = () => Math.max(0.22, threshold() * 7);
 
