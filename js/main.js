@@ -26,7 +26,7 @@
   layout();
 
   // Já baixa as falas enquanto a tela inicial aparece (sem abrir o áudio: no iPhone ele só pode nascer depois do microfone).
-  F.voice.init().then(() => F.voice.prefetch(['oi_brincar', 'r_denovo', 'r_uau', 'r_eba', 'r_mais', 'r_risada', 'p_falacomigo', 'b_bola', 't_cocegas']));
+  F.voice.init().then(() => F.voice.prefetch(['oi_henrique', 'oi_brincar', 'r_denovo', 'r_uau', 'r_eba', 'r_mais', 'r_risada', 'p_falacomigo', 'b_bola', 't_cocegas']));
 
   /* ---------- começar (um toque libera som e microfone) ---------- */
   async function requestWakeLock() {

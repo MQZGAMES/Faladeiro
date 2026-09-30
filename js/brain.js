@@ -1143,6 +1143,9 @@ F.brain = (() => {
       dog.play('jump'); sfx.boing();
       await wait(t, 600);
       dog.mood('excited'); dog.play('wave');
+      await V.say('oi_henrique'); check(t);
+      await wait(t, 500);
+      dog.play('wave');
       await V.say('oi_brincar'); check(t);
       dog.mood('listen');
       await wait(t, 900);
